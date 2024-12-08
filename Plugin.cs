@@ -32,13 +32,16 @@ namespace LiveDataLogger
             Logger.LogInfo("[LDL|INFO]: Config Loaded");
             Logger.LogInfo("[LDL|INFO]: Patches Loaded");
 
-            StartCoroutine(Tracker());
             var _server = new WebSocketServer(8001);
             _server.AddWebSocketService<LdlServer>("/");
             _server.Start();
             if (_server.IsListening)
             {
                 Logger.LogInfo("[LDL|INFO]: WSSV STarted.");
+                StartCoroutine(Tracker());
+            } else
+            {
+                Logger.LogError("Failed to start WSSV.");
             }
         }
         IEnumerator Tracker()
