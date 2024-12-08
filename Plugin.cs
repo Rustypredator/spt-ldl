@@ -48,14 +48,31 @@ namespace LiveDataLogger
                     if (gameWorld == null || myPlayer == null || gameWorld.LocationId == "hideout")
                         continue; // Skip if in hideout
 
-                    Logger.LogDebug("[LDL|DEBUG]: Tracking players...");
+                    Logger.LogInfo("[LDL|DEBUG]: Tracking players...");
 
                     IEnumerable<Player> allPlayers = gameWorld.AllPlayersEverExisted;
                     foreach (Player player in allPlayers)
                     {
-                        String playerName = player.name;
+                        bool playerAlive = player.HealthController.IsAlive;
 
-                        Logger.LogDebug("[LDL|DEBUG]: Player " + playerName);
+                        // Process player only if alive:
+                        if (playerAlive)
+                        {
+                            PlayerData pd = new PlayerData
+                            {
+                                profileId = player.ProfileId,
+                                name = player.Profile.Nickname,
+                                level = player.Profile.Info.Level,
+                                group = player?.AIData?.BotOwner?.BotsGroup?.Id ?? 0,
+                                position = player.Position.normalized,
+                                heading = player.LookDirection.normalized,
+                                type = player.IsAI ? "BOT" : "HUMAN"
+                            };
+
+                            String data = pd.ToJson();
+
+                            Logger.LogInfo("[LDL|DEBUG]: " + data);
+                        }
                     }
                 }
 
@@ -67,5 +84,15 @@ namespace LiveDataLogger
             }
         }
         public static bool MapLoaded() => Singleton<GameWorld>.Instantiated;
+        private class PlayerData
+        {
+            public String profileId { get; set; }
+            public String name { get; set; }
+            public int level { get; set; }
+            public int group { get; set; }
+            public Vector3 position { get; set; }
+            public Vector3 heading { get; set; }
+            public string type { get; set; }
+        }
     }
 }
