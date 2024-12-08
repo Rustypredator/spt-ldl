@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using WebSocketSharp.Server;
 
 namespace LiveDataLogger
 {
@@ -13,12 +14,14 @@ namespace LiveDataLogger
     public class Plugin : BaseUnityPlugin
     {
         public static ManualLogSource LogSource;
+        private WebSocketServer _server;
 
         // EFT:
         public static GameObject game;
         private GameWorld gameWorld;
         private Player myPlayer;
 
+        #pragma warning disable IDE0051 // Suppress not used error.
         private void Awake()
         {
             LogSource = Logger;
@@ -30,6 +33,13 @@ namespace LiveDataLogger
             Logger.LogInfo("[LDL|INFO]: Patches Loaded");
 
             StartCoroutine(Tracker());
+            var _server = new WebSocketServer(8001);
+            _server.AddWebSocketService<LdlServer>("/");
+            _server.Start();
+            if (_server.IsListening)
+            {
+                Logger.LogInfo("[LDL|INFO]: WSSV STarted.");
+            }
         }
         IEnumerator Tracker()
         {
@@ -70,8 +80,10 @@ namespace LiveDataLogger
                             };
 
                             String data = pd.ToJson();
-
-                            Logger.LogInfo("[LDL|DEBUG]: " + data);
+                            if (_server.WebSocketServices["/"].Sessions.Count > 0)
+                            {
+                                _server.WebSocketServices["/"].Sessions.Broadcast(data);
+                            }
                         }
                     }
                 }
