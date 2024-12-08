@@ -112,7 +112,6 @@
   <ItemGroup>
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="LdlServer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Patches\" />
