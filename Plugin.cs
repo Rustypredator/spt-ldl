@@ -96,6 +96,15 @@ namespace LiveDataLogger
             }
         }
         public static bool MapLoaded() => Singleton<GameWorld>.Instantiated;
+        public class LdlServer : WebSocketBehavior
+        {
+            private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("[LDL-Server]");
+
+            protected override void OnOpen()
+            {
+                Logger.LogInfo("Client Connected.");
+            }
+        }
         private class PlayerData
         {
             public String profileId { get; set; }
