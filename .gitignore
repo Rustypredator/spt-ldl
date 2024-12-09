@@ -1,6 +1,4 @@
 .vs
-.vs/*
 obj
-obj/*
 bin
-bin/*
+packages
