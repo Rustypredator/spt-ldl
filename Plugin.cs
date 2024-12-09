@@ -54,7 +54,7 @@ namespace LiveDataLogger
                     try
                     {
                         sd = new StoreData();
-                        sd.timestamp = new DateTime().ToString();
+                        sd.timestamp = (long)((DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalMilliseconds);
                         sd.raidId = gameWorld.gameObject.GetInstanceID().ToString();
                         sd.map = gameWorld.LocationId;
                     }
@@ -83,7 +83,7 @@ namespace LiveDataLogger
                         }
                     }
                     String data = sd.ToJson();
-                    System.IO.File.AppendAllText("LiveDataLogger.log", data + Environment.NewLine);
+                    System.IO.File.WriteAllText("LiveDataLogger.log", data);
                 }
 
                 catch (Exception ex)
@@ -110,13 +110,21 @@ namespace LiveDataLogger
             {
                 this.players = new List<PlayerData>();
             }
-            public String timestamp { get; set; }
+            public long timestamp { get; set; }
             public String raidId { get; set; }
             public String map {  get; set; }
             public List<PlayerData> players { get; set; }
-            public String ToJson()
+            public String ToJson(bool pretty = false)
             {
+                if (pretty)
+                {
+                    return Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+                }
                 return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+            }
+            public String ToPrettyJson()
+            {
+                return this.ToJson(true);
             }
         }
     }
