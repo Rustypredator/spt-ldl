@@ -6,15 +6,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using WebSocketSharp.Server;
 
 namespace LiveDataLogger
 {
     [BepInPlugin("info.rusty.spt.livedatalogger", "LiveDataLogger", "0.0.1")]
     public class Plugin : BaseUnityPlugin
     {
-        public static ManualLogSource LogSource;
-        private WebSocketServer _server;
+        public static ManualLogSource LogSource = BepInEx.Logging.Logger.CreateLogSource("LiveDataLogger");
 
         // EFT:
         public static GameObject game;
@@ -32,17 +30,7 @@ namespace LiveDataLogger
             Logger.LogInfo("[LDL|INFO]: Config Loaded");
             Logger.LogInfo("[LDL|INFO]: Patches Loaded");
 
-            var _server = new WebSocketServer(8001);
-            _server.AddWebSocketService<LdlServer>("/");
-            _server.Start();
-            if (_server.IsListening)
-            {
-                Logger.LogInfo("[LDL|INFO]: WSSV STarted.");
-                StartCoroutine(Tracker());
-            } else
-            {
-                Logger.LogError("Failed to start WSSV.");
-            }
+            StartCoroutine(Tracker());
         }
         IEnumerator Tracker()
         {
@@ -83,10 +71,6 @@ namespace LiveDataLogger
                             };
 
                             String data = pd.ToJson();
-                            if (_server.WebSocketServices["/"].Sessions.Count > 0)
-                            {
-                                _server.WebSocketServices["/"].Sessions.Broadcast(data);
-                            }
                         }
                     }
                 }
@@ -99,15 +83,6 @@ namespace LiveDataLogger
             }
         }
         public static bool MapLoaded() => Singleton<GameWorld>.Instantiated;
-        public class LdlServer : WebSocketBehavior
-        {
-            private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("[LDL-Server]");
-
-            protected override void OnOpen()
-            {
-                Logger.LogInfo("Client Connected.");
-            }
-        }
         private class PlayerData
         {
             public String profileId { get; set; }
