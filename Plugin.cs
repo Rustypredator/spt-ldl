@@ -5,9 +5,7 @@ using EFT;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using WatsonWebsocket;
 
 namespace LiveDataLogger
 {
@@ -15,7 +13,6 @@ namespace LiveDataLogger
     public class Plugin : BaseUnityPlugin
     {
         public static ManualLogSource LogSource = BepInEx.Logging.Logger.CreateLogSource("LiveDataLogger");
-        private WatsonWsServer WsServer;
 
         // EFT:
         public static GameObject game;
@@ -33,16 +30,7 @@ namespace LiveDataLogger
             Logger.LogInfo("[LDL|INFO]: Config Loaded");
             Logger.LogInfo("[LDL|INFO]: Patches Loaded");
 
-            // Start a Websocket Server:
-            WsServer = new WatsonWsServer("localhost", 8001, false);
-            if (WsServer.IsListening)
-            {
-                Logger.LogInfo("WsServer Started");
-                StartCoroutine(Tracker());
-            } else
-            {
-                Logger.LogInfo("WsServer failed to start.");
-            }
+            StartCoroutine(Tracker());
         }
         IEnumerator Tracker()
         {
@@ -83,19 +71,7 @@ namespace LiveDataLogger
                             };
 
                             String data = pd.ToJson();
-                            int count = WsServer.ListClients().Count();
-                            if (count > 0)
-                            {
-                                Logger.LogInfo($"Sending Data to {count} clients.");
-                                Logger.LogInfo($"{data}");
-                                foreach (ClientMetadata client in WsServer.ListClients())
-                                {
-                                    WsServer.SendAsync(client.Guid, data).Wait();
-                                }
-                            } else
-                            {
-                                Logger.LogInfo("No Clients connected, not sending anything.");
-                            }
+                            Logger.LogInfo($"{data}");
                         }
                     }
                 }
