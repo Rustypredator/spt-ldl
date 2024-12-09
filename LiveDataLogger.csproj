@@ -104,9 +104,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\EscapeFromTarkov_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
-    <Reference Include="WatsonWebsocket, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b91cb133bf2a61f3, processorArchitecture=MSIL">
-      <HintPath>packages\WatsonWebsocket.4.1.2\lib\net462\WatsonWebsocket.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Plugin.cs" />
@@ -114,9 +111,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Patches\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

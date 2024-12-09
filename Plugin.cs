@@ -13,6 +13,7 @@ namespace LiveDataLogger
     public class Plugin : BaseUnityPlugin
     {
         public static ManualLogSource LogSource = BepInEx.Logging.Logger.CreateLogSource("LiveDataLogger");
+        StoreData sd;
 
         // EFT:
         public static GameObject game;
@@ -49,13 +50,22 @@ namespace LiveDataLogger
                     if (gameWorld == null || myPlayer == null || gameWorld.LocationId == "hideout")
                         continue; // Skip if in hideout
 
-                    Logger.LogInfo("[LDL|DEBUG]: Tracking players...");
-
                     IEnumerable<Player> allPlayers = gameWorld.AllPlayersEverExisted;
+                    try
+                    {
+                        sd = new StoreData();
+                        sd.timestamp = new DateTime().ToString();
+                        sd.raidId = gameWorld.gameObject.GetInstanceID().ToString();
+                        sd.map = gameWorld.LocationId;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError("Failed to create sd");
+                    }
+                    
                     foreach (Player player in allPlayers)
                     {
                         bool playerAlive = player.HealthController.IsAlive;
-
                         // Process player only if alive:
                         if (playerAlive)
                         {
@@ -69,11 +79,11 @@ namespace LiveDataLogger
                                 heading = player.LookDirection.normalized,
                                 type = player.IsAI ? "BOT" : "HUMAN"
                             };
-
-                            String data = pd.ToJson();
-                            Logger.LogInfo($"{data}");
+                            sd.players.Add(pd);
                         }
                     }
+                    String data = sd.ToJson();
+                    System.IO.File.AppendAllText("LiveDataLogger.log", data + Environment.NewLine);
                 }
 
                 catch (Exception ex)
@@ -93,6 +103,21 @@ namespace LiveDataLogger
             public Vector3 position { get; set; }
             public Vector3 heading { get; set; }
             public string type { get; set; }
+        }
+        private class StoreData
+        {
+            public StoreData()
+            {
+                this.players = new List<PlayerData>();
+            }
+            public String timestamp { get; set; }
+            public String raidId { get; set; }
+            public String map {  get; set; }
+            public List<PlayerData> players { get; set; }
+            public String ToJson()
+            {
+                return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+            }
         }
     }
 }
